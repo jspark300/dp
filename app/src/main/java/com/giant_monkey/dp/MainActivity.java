@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
         // db 확인
         // 파일 확인
         myList = new ArrayList();
+
         myList.add("20170108_005018.mp4");
         myList.add("20170108_001456.mp4");
 
