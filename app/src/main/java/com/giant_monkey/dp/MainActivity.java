@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
         // 파일 확인
         myList = new ArrayList();
 
-
+        // 파일 추가 1
         myList.add("20170108_005018.mp4");
         myList.add("20170108_001456.mp4");
 
