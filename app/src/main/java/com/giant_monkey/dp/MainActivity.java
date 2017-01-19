@@ -1,12 +1,22 @@
 package com.giant_monkey.dp;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +41,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button button = (Button) findViewById(R.id.button);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                moveScreenshot(videoView);
+            }
+        });
         // VideoView init
         videoView = (VideoView) findViewById(R.id.videoView);
         // play();
@@ -174,14 +192,14 @@ public class MainActivity extends Activity {
 //    }
     void play() {
         if(myList.size()>0) {
+            ++index;
             if (myList.size() > index)
                 videoView.setVideoPath("/sdcard/DCIM/" + myList.get(index).toString());
             else {
                 index = 0;
                 videoView.setVideoPath("/sdcard/DCIM/" + myList.get(index).toString());
-
             }
-            ++index;
+
         }
 
     }
@@ -199,5 +217,31 @@ public class MainActivity extends Activity {
         Toast.makeText(MainActivity.this, filename+"을 다운로드 중입니다.", Toast.LENGTH_SHORT).show();
         new DownloadFileAsync(this).execute("http://hq.giant-monkey.com/"+filename,filename,"1");
 
+    }
+
+    private void moveScreenshot(VideoView view) {
+        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+
+        mediaMetadataRetriever.setDataSource("/sdcard/DCIM/"+myList.get(index).toString());
+        int currentPosition = view.getCurrentPosition();
+
+        Toast.makeText(this,"Current Position: " + currentPosition + "(ms)", Toast.LENGTH_SHORT).show();
+        Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(currentPosition * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+        if(bmFrame == null) {
+            Toast.makeText(this, "mbFrame==null", Toast.LENGTH_SHORT).show();
+        } else {
+            File imagePath = new File(Environment.getExternalStorageDirectory() + "/DCIM/screen"+currentPosition+".png");
+            FileOutputStream fos;
+            try {
+                fos = new FileOutputStream(imagePath);
+                bmFrame.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                //ImageView capturedImageView = new ImageView(this);
+                //capturedImageView.setImageBitmap(bmFrame);
+            } catch (FileNotFoundException e) {
+                Log.e("GREC", e.getMessage(), e);
+            } catch (IOException e) {
+                Log.e("GREC", e.getMessage(), e);
+            }
+        }
     }
 }
